@@ -2,17 +2,46 @@ import numpy as np
 import em
 import common
 
-X = np.loadtxt("netflix_incomplete.txt")
-X_gold = np.loadtxt("netflix_complete.txt")
-K = 12
-n, d = X.shape
+X = np.loadtxt("test_incomplete.txt")
+X_gold = np.loadtxt("test_complete.txt")
 
-# TODO: Your code here
-seed =1
-mixture,post=init(X,K,seed)
-post,cost = estep(X,mixture)
-mixture_new = mstep(X,post,mixture,0.25)
-mixture_latest,_,_ = run(X,mixture_new,post)
-X_pred = fill_matrix(X,mixture_latest)
-print(common.rmse(X_gold,X_pred))
+K = 4
+n, d = X.shape
+seed = 0
+
+mixture, _ = common.init(X, K, seed)
+
+print("Input:")
+print('X:\n' + str(X))
+print('K: ' + str(K))
+print('Mu:\n' + str(mixture.mu))
+print('Var: ' + str(mixture.var))
+print('P: ' + str(mixture.p))
+print()
+
+print("After first E-step:")
+post, ll = em.estep(X, mixture)
+print('post:\n' + str(post))
+print('LL:' + str(ll))
+print()
+
+print("After first M-step:")
+mu, var, p = em.mstep(X, post, mixture)
+print('Mu:\n' + str(mu))
+print('Var: ' + str(var))
+print('P: ' + str(p))
+print()
+
+print("After a run")
+(mu, var, p), post, ll = em.run(X, mixture, post)
+print('Mu:\n' + str(mu))
+print('Var: ' + str(var))
+print('P: ' + str(p))
+print('post:\n' + str(post))
+print('LL: ' + str(ll))
+X_pred = em.fill_matrix(X, common.GaussianMixture(mu, var, p))
+error = common.rmse(X_gold, X_pred)
+print("X_gold:\n" + str(X_gold))
+print("X_pred:\n" + str(X_pred))
+print("RMSE: " + str(error))
 
